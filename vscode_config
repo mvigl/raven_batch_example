@@ -1,0 +1,63 @@
+# Correctly resolve short names of gateway machines and HPC nodes
+Host viper
+   HostName viper12i.mpcdf.mpg.de
+   User mvigl
+Host raven
+   HostName raven.mpcdf.mpg.de
+   User mvigl
+Host gpu01
+   HostName gpu01.t2.mpcdf.mpg.de
+   User mvigl   
+
+Host gate1.mpcdf.mpg.de
+   HostName gate1.mpcdf.mpg.de
+   User mvigl
+Match originalhost gate*,cobra,raven,viper,gpu01
+   CanonicalDomains mpcdf.mpg.de
+   CanonicalizeFallbackLocal no
+   CanonicalizeHostname yes
+# Keep a tunnel open for the day when accessing the gate machines
+Match canonical host gate*
+   User mvigl
+   Compression yes
+   ServerAliveInterval 120
+   ControlMaster auto
+   ControlPersist 10h
+   ControlPath ~/.ssh/master-%C
+# Keep a tunnel open for the day when accessing the HPC nodes
+Match canonical host cobra*,raven*,viper*,gpu01*,odslserv*
+   User mvigl
+   Compression yes
+   ControlMaster auto
+   ControlPersist 10h
+   ControlPath ~/.ssh/master-%C
+   # OpenSSH >=7.3
+   ProxyJump gate1
+   # OpenSSH <=7.2
+   #ProxyCommand ssh -W %h:%p gatezero
+
+ControlPath  ~/.ssh/controlmaster-%r@%h:%p
+ControlPersist 10h 
+
+Host odsl~*
+  RemoteCommand ~/.local/bin/cenv odsl
+  RequestTTY yes
+
+Host *.mpcdf.mpg.de mpcdf-* *~mpcdf-* mpp-cluster *~mpp-cluster raven *~raven cobra *~cobra viper *~viper gpu01 *~gpu01 odslserv* *~odslserv*
+  User mvigl
+  PubkeyAuthentication no 
+  ForwardAgent yes
+  ServerAliveInterval 120
+  ControlMaster auto 
+
+Host mpcdf-login
+  Hostname gate1.mpcdf.mpg.de
+
+Host mpp-cluster odsl~mpp-cluster
+  HostName mppui4.t2.rzg.mpg.de
+  ProxyJump mpcdf-login
+
+Host odslserv02 odsl~odslserv02
+  HostName odslserv02.t2.mpcdf.mpg.de
+  User mvigl
+  ProxyJump mpcdf-login   
