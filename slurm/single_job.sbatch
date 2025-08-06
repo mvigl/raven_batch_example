@@ -22,8 +22,9 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mvigl@mpcdf.mpg.de
 
-# Load compiler and MPI modules (must be the same as used in conda env)
 module purge
+
+# Load compiler and MPI modules (must be the same as used in conda env)
 module load anaconda/3/2021.11 # <-> python 3.9.
 module load cuda/11.6
 module load cudnn/8.8
@@ -33,7 +34,13 @@ module load pytorch/gpu-cuda-11.6/2.0.0
 eval "$(conda shell.bash hook)"
 conda env create -f ../gpu_env.yaml
 conda activate gpu_env
-#or just pip install -r requirements.txt
+
+# or just 
+# pip install -r requirements.txt
+
+
+# or even BETTER load your VIRTUAL ENVIRONMENT
+# source ~/envs/my-env/bin/activate
 
 config="$1"
 checkpoint="$2"
